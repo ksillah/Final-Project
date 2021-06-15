@@ -6,6 +6,26 @@ const bodyParser= require("body-parser")
 const app = express();
 app.use(cors())
 app.use(bodyParser.json())
+//refreshes token aften an hour
+app.post('/refresh', (req,res) =>{
+    const refreshToken= req.body.refreshToken
+    const spotifyApi = new SpotifyWebApi({
+        clientId : "27f19ced5a414e7498169bdd52708cd5",
+        redirectUri : "http://localhost:3000/callback/",
+        clientSecret : '40510d1bf3c045149e137ef235d75092',
+        refreshToken
+    })
+
+    spotifyApi.refreshAccessToken().then(
+        (data)=> {
+          res.json({
+              accessToken:data.body.accessToken,
+              expiresIn: data.body.expiresIn
+          })
+        }).catch(() =>{
+            res.sendStatus(400)
+        })
+})
 
 app.post('/login', (req, res)=>{
     const code = req.body.code
