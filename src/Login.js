@@ -108,7 +108,8 @@ const redirectUri = "http://localhost:3000/callback/";
 const scopes = [
   "user-read-currently-playing",
   "user-read-playback-state",
-  "playlist-modify-public"
+  "playlist-modify-public",
+  "playlist-read-collaborative"
 ];
 
 const AUTH_URL =`https://accounts.spotify.com/authorize?client_id=${clientId}&response_type=code&redirect_uri=${redirectUri}&scope=streaming%20user-read-email%20user-read-private%20user-library-read%20user-library-modify%20user-read-playback-state%20user-modify-playback-state`

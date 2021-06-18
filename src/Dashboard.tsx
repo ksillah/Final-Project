@@ -8,7 +8,7 @@ import TextField from '@material-ui/core/TextField';
 import MenuItem from '@material-ui/core/MenuItem';
 import Typography from '@material-ui/core/Typography';
 import { useEffect } from 'react';
-import code from './App';
+//const cors=require('cors');
 
 
 const countries = [
@@ -50,11 +50,11 @@ const spotifyApi= new SpotifyWebApi({
 })
 
 export default function Dashboard({code} ) {
+    var [playlist_id, setPlaylist_id] = useState('');
     const accessToken=useAuth(code);
     console.log(accessToken)
     const classes= useStyles();
     const [value, setValue] = useState('');
-
     const handleChange = e => setValue(e.target.value)//hold on to the value the user selected
 
     useEffect(() =>{
@@ -66,12 +66,47 @@ export default function Dashboard({code} ) {
       if (!value) return
       spotifyApi.setAccessToken(accessToken)
       if (!accessToken) return
-      spotifyApi.searchTracks(value).then(res=>{
-        console.log(res.body.tracks)
+      console.log(value)
+      spotifyApi.searchPlaylists("Top 50 - "+ value).then(function(data) {
+        setPlaylist_id( data.body.playlists.items[0].id)
+        console.log('Found playlists are', data.body);
+        console.log(playlist_id)
       })
-      console.log(accessToken)
+      console.log(playlist_id)
+    }, [accessToken, value,playlist_id])
+    
+    useEffect(()=>{
+      console.log('here',playlist_id)
+      if (playlist_id=='') return
+      spotifyApi.setAccessToken(accessToken)
+      if (!accessToken) return
+      
+      spotifyApi.getPlaylistTracks(playlist_id,{//37i9dQZEVXbMXbN3EUUhlg
+            fields: 'items'
+          }).then(
+          function(data) {
+            console.log('made it')
+          console.log('The playlist contains these tracks', data.body);
+          })
+    }, [accessToken, value,playlist_id])
 
-    }, [accessToken, value])
+    
+
+    // useEffect(()=>{
+    //   if (!value) return
+    //   spotifyApi.setAccessToken(accessToken)
+    //   if (!accessToken) return
+    //   console.log('HERE:',playlist_id)
+    //   console.log(accessToken)
+    //   spotifyApi.getPlaylistTracks({playlist_id},{
+    //     fields: 'items'
+    //   }).then(
+    //   function(data) {
+    //   console.log(playlist_id)
+    //   console.log('The playlist contains these tracks', data.body);
+    //   })
+  
+    // }, [accessToken, value, playlist_id])
 
     return (
       <div>
@@ -91,7 +126,7 @@ export default function Dashboard({code} ) {
           </FormControl>
           
           
-          <h1>you chose {value},{code}</h1>
+          <h1>you chose {value}</h1>
           
         </div>
       </div>
