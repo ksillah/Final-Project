@@ -13,24 +13,19 @@ import { DataGrid, GridRowsProp, GridColDef, GridCellParams , } from '@material-
 import { useGridApiRef } from '@material-ui/x-grid';
 import { render } from '@testing-library/react';
 import { redirectUri } from './config_example';
+//import countries from './countries';
 
 //const cors=require('cors');
 
 
 const countries = [
-  {
-    value: 'USA',
-    label: 'United States',
-  },
-  {
-    value: 'Iceland',
-    label: 'Iceland',
-  },
-  {
-    value: 'Brazil',
-    label: 'Brazil',
-  },
-];
+ 'Austria','Argentina','Australia','Belgium','Bolivia','Brazil','Bulgaria','Canada','Chile','Colombia','Costa Rica','Czech Republic',
+'Denmark','Dominican Republic','Ecuador','El Salvador','Estonia','France','Germany','Greece','Guatemala','Honduras','Hong Kong','Hungary',
+'Iceland','India','Indonesia', 'Ireland','Israel','Italy','Japan','Latvia','Lithuania','Luxembourg','Malaysia','Mexico','Morocco','Netherlands',
+'New Zealand','Nicaragua','Norway','Panama','Paraguay','Peru','Philippines','Poland','Portugal','Puerto Rico','Romania','Russia','Saudi Arabia',
+'Singapore','Slovakia','South Africa','South Korea','Spain','Sweden','Switzerland','Taiwan','Thailand','Turkey','Ukraine','United Emirates',
+'United Kingdom','United States','Uruguay', 'Vietnam',
+]
 
 
 const useStyles = makeStyles(theme =>({
@@ -78,6 +73,9 @@ export default function Dashboard({code} ) {
     useEffect(() =>{
       if (!accessToken) return
       spotifyApi.setAccessToken(accessToken)
+      setArtist([]);
+      setTrack([]);
+      setPreview([]);
     }, [accessToken])
 
     useEffect(()=>{
@@ -86,7 +84,7 @@ export default function Dashboard({code} ) {
       if (!accessToken) return
       setArtist([]);
       setTrack([]);
-      setPreview([])
+      setPreview([]);
       //setResult([])
       console.log(value)
       spotifyApi.searchPlaylists("Top 50 - "+ value).then(function(data) {
@@ -102,34 +100,23 @@ export default function Dashboard({code} ) {
       if (playlist_id=='') return
       spotifyApi.setAccessToken(accessToken)
       if (!accessToken) return
-      setArtist([]);
-      setTrack([]);
-      setPreview([])
-      
-      spotifyApi.getPlaylistTracks(playlist_id,{//37i9dQZEVXbMXbN3EUUhlg
-            fields: 'items'
-          }).then(
-          function(data) {
+        spotifyApi.getPlaylistTracks(playlist_id,{fields: 'items'}).then(
+        function(data) {
+            artists=[]
+            tracks=[]
+            previews=[]
             console.log('made it')
-          console.log('The playlist contains these tracks', data.body);
-          for (var i = 0; i < 15; i++) {
-            var artist=data.body.items[i].track.artists[0].name
-            var track=data.body.items[i].track.name
-            var preview= data.body.items[i].track.preview_url
-            var val=[[artist],[track],[preview]]
-            previews.push(preview)
-            artists.push(artist)
-            tracks.push(track)
-            //console.log(v)
-            //result.push(val)
-            
-            console.log('tracks', tracks)
-            
-            //result.push(val)
-            //rows[i]={id:i, col1: artist , col2: track, col3: preview}
-            //console.log(rows[i])
-          
+            console.log('The playlist contains these tracks', data.body);
+            for (var i = 0; i < 25; i++) {
+              var artist=data.body.items[i].track.artists[0].name
+              var track=data.body.items[i].track.name
+              var preview= data.body.items[i].track.preview_url
+              var val=[[artist],[track],[preview]]
+              previews.push(preview)
+              artists.push(artist)
+              tracks.push(track)
           }
+          console.log(tracks)
           setArtist(artists);
           setTrack(tracks);
           console.log('tracks2', tracks)
@@ -157,6 +144,17 @@ export default function Dashboard({code} ) {
       { id: 13, col1: artists[12] , col2: tracks[12], col3: previews[12] },
       { id: 14, col1: artists[13] , col2: tracks[13], col3: previews[13] },
       { id: 15, col1: artists[14] , col2: tracks[14], col3: previews[14] },
+      { id: 16, col1: artists[15] , col2: tracks[15], col3: previews[15] },
+      { id: 17, col1: artists[16] , col2: tracks[16], col3: previews[16] },
+      { id: 18, col1: artists[17] , col2: tracks[17], col3: previews[17] },
+      { id: 19, col1: artists[18] , col2: tracks[18], col3: previews[18] },
+      { id: 20, col1: artists[19] , col2: tracks[19], col3: previews[19] },
+      { id: 21, col1: artists[20] , col2: tracks[20], col3: previews[20] },
+      { id: 22, col1: artists[21] , col2: tracks[21], col3: previews[21] },
+      { id: 23, col1: artists[22] , col2: tracks[22], col3: previews[22] },
+      { id: 24, col1: artists[23] , col2: tracks[23], col3: previews[23] },
+      { id: 25, col1: artists[24] , col2: tracks[24], col3: previews[24] },
+
   
     ];
     const columns: GridColDef[] = [
@@ -166,7 +164,6 @@ export default function Dashboard({code} ) {
   {field: 'col4', headerName: 'Button', width:200,
   renderCell: (params: GridCellParams) => (
     <strong>
-      {console.log(params.getValue(params.id,'col1'))}
       
 
       <a style={{ color:'blue'}}  href={params.getValue(params.id,'col3')} target="_blank">
@@ -179,18 +176,16 @@ export default function Dashboard({code} ) {
 
   let output;
   console.log('tracks3', tracks)
-  if (tracks.length==15) {
+  if (tracks.length==25) {
     output = <DataGrid checkboxSelection rows={rows} columns={columns} />;
   } else {
     output ='';
   }
-  //var l=result.length
-
-    
-          // var newtag =document.createElement('h4')
-          // newtag.append(val)
-          // var element= document.getElementById('new');
-          // element.appendChild(newtag);
+  const items=[]
+    for (let i = 0; i < countries.length; i++){ 
+    items.push(<MenuItem value={countries[i]}>{countries[i]}</MenuItem>)
+    }
+  
 
     return (
       
@@ -198,16 +193,17 @@ export default function Dashboard({code} ) {
       <AppBar  position="fixed" style= {{paddingLeft: '15px' }}>
                 <h1>Sounds of the World</h1>
       </AppBar>
-      
 
         <div className ={classes.main}>
           <FormControl className= {classes.formControl}>
             <InputLabel style= {{font: '10px' }}> What Country are you visiting?</InputLabel>
           <Select onChange={handleChange}>
-            <MenuItem value={'USA'}>United States</MenuItem>
+            {/* for (let i = 0; i < countries.length; i++){ */}
+            {items}
+            {/* <MenuItem value={'USA'}>United States</MenuItem>
             <MenuItem value={'Brazil'}>Brazil</MenuItem>
-            <MenuItem value={'Iceland'}>Iceland</MenuItem>
-          </Select>
+            <MenuItem value={'Iceland'}>Iceland</MenuItem>*/}
+          </Select> 
           </FormControl>
           
           
