@@ -22,7 +22,7 @@ const countries = [
  'Austria','Argentina','Australia','Belgium','Bolivia','Brazil','Bulgaria','Canada','Chile','Colombia','Costa Rica','Czech Republic',
 'Denmark','Dominican Republic','Ecuador','El Salvador','Estonia','France','Germany','Greece','Guatemala','Honduras','Hong Kong','Hungary',
 'Iceland','India','Indonesia', 'Ireland','Israel','Italy','Japan','Latvia','Lithuania','Luxembourg','Malaysia','Mexico','Morocco','Netherlands',
-'New Zealand','Nicaragua','Norway','Panama','Paraguay','Peru','Philippines','Poland','Portugal','Puerto Rico','Romania','Russia','Saudi Arabia',
+'New Zealand','Nicaragua','Nigeria','Norway','Panama','Paraguay','Peru','Philippines','Poland','Portugal','Puerto Rico','Romania','Russia','Saudi Arabia',
 'Singapore','Slovakia','South Africa','South Korea','Spain','Sweden','Switzerland','Taiwan','Thailand','Turkey','Ukraine','United Emirates',
 'United Kingdom','United States','Uruguay', 'Vietnam',
 ]
@@ -37,7 +37,6 @@ const useStyles = makeStyles(theme =>({
     backgroundRepeat: 'no-repeat',
     backgroundPosition: 'center',
     color: '#002699',
-    //position: 'fixed',
     textAlign: 'center',
     paddingTop: '250px',
 },
@@ -56,18 +55,17 @@ const spotifyApi= new SpotifyWebApi({
 
 export default function Dashboard({code} ) {
   
-    //var sound;
     var [playlist_id, setPlaylist_id] = useState('');
-    //var [result,setResult]= useState([]);
     var [artists,setArtist]= useState([]);
     var [tracks,setTrack]= useState([]);
     var [previews,setPreview]= useState([]);
-    
+
+    //Gets the user selected country
     const accessToken=useAuth(code);
-    console.log(accessToken)
+    //console.log(accessToken)
     const classes= useStyles();
     const [value, setValue] = useState('');
-    const handleChange = e => setValue(e.target.value)//hold on to the value the user selected
+    const handleChange = e => setValue(e.target.value)//identifies the user selected country
     const apiRef = useGridApiRef();
 
     useEffect(() =>{
@@ -80,54 +78,66 @@ export default function Dashboard({code} ) {
 
     useEffect(()=>{
       if (!value) return
-      spotifyApi.setAccessToken(accessToken)
       if (!accessToken) return
+      spotifyApi.setAccessToken(accessToken)
       setArtist([]);
       setTrack([]);
       setPreview([]);
-      //setResult([])
       console.log(value)
-      spotifyApi.searchPlaylists("Top 50 - "+ value).then(function(data) {
+      spotifyApi.searchPlaylists("Top 50 - "+ value).then(function(data) {//finds the top 50 playlist for the selected country
         setPlaylist_id( data.body.playlists.items[0].id)
         console.log('Found playlists are', data.body);
-        console.log(playlist_id)
+        //console.log(playlist_id)
       })
-      console.log(playlist_id)
     }, [accessToken, value,playlist_id])
     
-    useEffect(()=>{
-      console.log('here',playlist_id)
-      if (playlist_id=='') return
-      spotifyApi.setAccessToken(accessToken)
+    useEffect(()=>{//puts the top 25 songs into table
       if (!accessToken) return
+      if (playlist_id=='') return
+      console.log('here',playlist_id)
+      spotifyApi.setAccessToken(accessToken)
+      
         spotifyApi.getPlaylistTracks(playlist_id,{fields: 'items'}).then(
         function(data) {
-            artists=[]
-            tracks=[]
-            previews=[]
-            console.log('made it')
-            console.log('The playlist contains these tracks', data.body);
-            for (var i = 0; i < 25; i++) {
-              var artist=data.body.items[i].track.artists[0].name
-              var track=data.body.items[i].track.name
-              var preview= data.body.items[i].track.preview_url
-              var val=[[artist],[track],[preview]]
-              previews.push(preview)
-              artists.push(artist)
-              tracks.push(track)
-          }
-          console.log(tracks)
+          artists=[]
+          tracks=[]
+          previews=[]
+          console.log('made it')
+          console.log('The playlist contains these tracks', data.body);
+          for (var i = 0; i < 25; i++) {
+            var artist=data.body.items[i].track.artists[0].name
+            var track=data.body.items[i].track.name
+            var preview= data.body.items[i].track.preview_url
+            var val=[[artist],[track],[preview]]
+            previews.push(preview)
+            artists.push(artist)
+            tracks.push(track)
+        }
           setArtist(artists);
           setTrack(tracks);
-          console.log('tracks2', tracks)
           setPreview(previews)
-          ///console.log('final result', result)
           })
           
     }, [accessToken, value,playlist_id])
     
-
-    //console.log(result)
+    // let ready=false
+    // console.log('ready',ready)
+    let output=''
+    function createPlaylist() {
+      //if (output=='') return
+      spotifyApi.setAccessToken(accessToken)
+      spotifyApi.createPlaylist( `My ${value} playlist`, { 'description': `My favorite songs from the top 25 songs in ${value} right now`, 'public': true })
+      .then(function(data) {
+      console.log('Created playlist!');
+      }, function(err) {
+        console.log('Something went wrong!', err);
+        return;
+        });
+        
+    };
+    
+    
+    //structure of table
     const rows: GridRowsProp = [
       { id: 1, col1: artists[0] , col2: tracks[0], col3: previews[0]},
       { id: 2, col1: artists[1] , col2: tracks[1], col3: previews[1] },
@@ -162,10 +172,8 @@ export default function Dashboard({code} ) {
   { field: 'col2', headerName: 'Song', width: 300 },
   {field: 'col3', headerName: 'Preview', width: 200, hide:true},
   {field: 'col4', headerName: 'Button', width:200,
-  renderCell: (params: GridCellParams) => (
+  renderCell: (params: GridCellParams) => (//creates preview link
     <strong>
-      
-
       <a style={{ color:'blue'}}  href={params.getValue(params.id,'col3')} target="_blank">
         <h3>preview </h3>
       </a>
@@ -173,50 +181,41 @@ export default function Dashboard({code} ) {
   ),
   }
   ];
-
-  let output;
-  console.log('tracks3', tracks)
+//determines if the data table should be shown
+  
+  //console.log('tracks3', tracks)
   if (tracks.length==25) {
     output = <DataGrid checkboxSelection rows={rows} columns={columns} />;
-  } else {
-    output ='';
+    // ready=true
+    // console.log('ready',ready)
   }
+  //creates drop down for countries
   const items=[]
     for (let i = 0; i < countries.length; i++){ 
     items.push(<MenuItem value={countries[i]}>{countries[i]}</MenuItem>)
     }
+    
   
 
     return (
       
       <div>
-      <AppBar  position="fixed" style= {{paddingLeft: '15px' }}>
-                <h1>Sounds of the World</h1>
-      </AppBar>
-
+        <AppBar  position="fixed" style= {{paddingLeft: '15px' }}>
+                  <h1>Sounds of the World</h1>
+        </AppBar>
         <div className ={classes.main}>
           <FormControl className= {classes.formControl}>
-            <InputLabel style= {{font: '10px' }}> What Country are you visiting?</InputLabel>
-          <Select onChange={handleChange}>
-            {/* for (let i = 0; i < countries.length; i++){ */}
-            {items}
-            {/* <MenuItem value={'USA'}>United States</MenuItem>
-            <MenuItem value={'Brazil'}>Brazil</MenuItem>
-            <MenuItem value={'Iceland'}>Iceland</MenuItem>*/}
-          </Select> 
+            <InputLabel style= {{}}> What Country are you visiting?</InputLabel>
+            <Select onChange={handleChange}>
+              {items}
+            </Select> 
           </FormControl>
-          
-          
-          <h1>you chose {value}</h1>
-            
-          <div style={{ height: 500, width: '100%' }}>
-            
+          <button onClick={createPlaylist}  style= {{font: '40px', height:'40px',marginLeft: '40px', background:'#002699', color:'white'  }}>Create New PLaylist</button>
+          <div style={{ height: 500, width: '80%', }} >
             {output}
-          </div>
-
+          </div >
         </div>
       </div>
-
     
   );
 }
