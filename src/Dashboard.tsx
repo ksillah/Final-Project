@@ -11,12 +11,13 @@ import Typography from '@material-ui/core/Typography';
 import { useEffect } from 'react';
 import { DataGrid, GridRowsProp, GridColDef, GridCellParams , } from '@material-ui/data-grid';
 import { useGridApiRef } from '@material-ui/x-grid';
+
 import { render } from '@testing-library/react';
 import { redirectUri } from './config_example';
 //import countries from './countries';
 
 //const cors=require('cors');
-
+const cors=require('cors')
 
 const countries = [
  'Austria','Argentina','Australia','Belgium','Bolivia','Brazil','Bulgaria','Canada','Chile','Colombia','Costa Rica','Czech Republic',
@@ -26,6 +27,7 @@ const countries = [
 'Singapore','Slovakia','South Africa','South Korea','Spain','Sweden','Switzerland','Taiwan','Thailand','Turkey','Ukraine','United Emirates',
 'United Kingdom','United States','Uruguay', 'Vietnam',
 ]
+let my_id=''
 
 
 const useStyles = makeStyles(theme =>({
@@ -60,6 +62,8 @@ export default function Dashboard({code} ) {
     var [tracks,setTrack]= useState([]);
     var [previews,setPreview]= useState([]);
     var[uris,setUris]=useState([]);
+    var [select,setSelection] = useState([]);
+  
 
     //Gets the user selected country
     const accessToken=useAuth(code);
@@ -94,6 +98,7 @@ export default function Dashboard({code} ) {
       
         spotifyApi.getPlaylistTracks(playlist_id,{fields: 'items'}).then(
         function(data) {
+          select=[]
           artists=[]
           tracks=[]
           previews=[]
@@ -124,9 +129,10 @@ export default function Dashboard({code} ) {
     // let ready=false
     // console.log('ready',ready)
     let output=''
-    let my_id=''
+    
     function createPlaylist() {
-      //if (output=='') return
+      if (!accessToken) return
+      if (output=='') return
       spotifyApi.setAccessToken(accessToken)
       spotifyApi.createPlaylist( `My ${value} playlist`, { 'description': `My favorite songs from the top 25 songs in ${value} right now`, 'public': true })
       .then(function(data) {
@@ -135,6 +141,28 @@ export default function Dashboard({code} ) {
       console.log('playlist_id', my_id)
       }, function(err) {
         console.log('Something went wrong!', err);
+        return my_id;
+        });
+        
+    };
+    console.log("ghgj",my_id)
+    function addTracks() {
+      //if (output=='') return
+      console.log("ghgj",my_id)
+      spotifyApi.setAccessToken(accessToken)
+      var selectedSongs=[];
+      var x
+      console.log(select)
+      for (let x=0; x< select.length;x++){
+        selectedSongs.push(uris[(select[x]-1)])
+      }
+      console.log(uris)
+      console.log('selectedsongs',selectedSongs)
+      spotifyApi.addTracksToPlaylist(my_id,selectedSongs)
+      .then(function(data) {
+      console.log('added tracks to playlist', data);
+      }, function(err) {
+        console.log('Something went wrong add tracks!', err);
         return;
         });
         
@@ -184,11 +212,20 @@ export default function Dashboard({code} ) {
   ),
   }
   ];
+  const handleRowSelection = (e) => {
+    setSelection(e.selectionModel);
+  }
+  
+  useEffect(() => {
+    console.log(select); // <-- The state is updated
+  }, [select]);
+  
+
 //determines if the data table should be shown
   
   //console.log('tracks3', tracks)
   if (tracks.length>0) {
-    output = <DataGrid checkboxSelection rows={rows} columns={columns} />;
+    output = <DataGrid checkboxSelection   onSelectionModelChange = {handleRowSelection} rows={rows} columns={columns} />;
     // ready=true
     // console.log('ready',ready)
   }
@@ -198,6 +235,7 @@ export default function Dashboard({code} ) {
     items.push(<MenuItem value={countries[i]}>{countries[i]}</MenuItem>)
     }
     
+  //console.log(this.dataGridRef.current.instance)
   
 
     return (
@@ -214,6 +252,7 @@ export default function Dashboard({code} ) {
             </Select> 
           </FormControl>
           <button onClick={createPlaylist}  style= {{font: '40px', height:'40px',marginLeft: '40px', background:'#002699', color:'white'  }}>Create New PLaylist</button>
+          <button onClick={addTracks}  style= {{font: '40px', height:'40px',marginLeft: '40px', background:'#002699', color:'white'  }}>Add Tracks</button>
           <div style={{ height: 500, width: '80%', }} >
             {output}
           </div >
