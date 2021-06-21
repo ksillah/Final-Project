@@ -1,5 +1,6 @@
 import {React, useState} from 'react';
 import ReactDOM from 'react-dom';
+import Player from './Player'
 import useAuth from './useAuth';
 import SpotifyWebApi from 'spotify-web-api-node';
 import {Select, FormControl, InputLabel, AppBar, Button, Link} from '@material-ui/core';
@@ -40,11 +41,12 @@ const useStyles = makeStyles(theme =>({
     backgroundPosition: 'center',
     color: '#002699',
     textAlign: 'center',
-    paddingTop: '250px',
+    paddingTop: '100px',
 },
   formControl:{
     position: 'relative',
     minWidth:300,
+    
   }
 }));
 
@@ -63,8 +65,7 @@ export default function Dashboard({code} ) {
     var [previews,setPreview]= useState([]);
     var[uris,setUris]=useState([]);
     var [select,setSelection] = useState([]);
-    var [addTrackButton, setaddTrackButton]=useState();
-    var hi;
+    var [listento, setListenTo]=useState([]);
 
     //Gets the user selected country
     const accessToken=useAuth(code);
@@ -126,7 +127,7 @@ export default function Dashboard({code} ) {
           })
           
     }, [accessToken, value,playlist_id])
-    let output=''
+    let output='';
     
     function createPlaylist() {
       console.log('og select',select);
@@ -193,7 +194,11 @@ export default function Dashboard({code} ) {
         
     };
     
-    
+    // function listens(song){
+    //   setListenTo(song)
+    //   console.log('set to', listento);
+    //   return ;
+    // }
     
     //structure of table
     const rows: GridRowsProp = [
@@ -227,19 +232,22 @@ export default function Dashboard({code} ) {
   { field: 'col1', headerName: 'Artist', width: 200 },
   { field: 'col2', headerName: 'Song', width: 300 },
   {field: 'col3', headerName: 'Preview', width: 200, hide:true},
-  {field:'col4', headerName:'Uri', width:200},
-  {field: 'col5', headerName: 'Button', width:200,
-  renderCell: (params: GridCellParams) => (//creates preview link
-    <strong>
-      <a style={{ color:'blue'}}  href={params.getValue(params.id,'col3')} target="_blank">
-        <h3>preview </h3>
-      </a>
-    </strong>
-  ),
-  }
+  {field:'col4', headerName:'Uri', width:200}
+  // {field: 'col5', headerName: 'Button', width:200,
+  // renderCell: (params: GridCellParams) => (//creates preview link
+  //   <strong>
+  //     <button style={{ color:'blue'}} > 
+
+  //     {/* onClick={setListenTo(params.getValue(params.id,'col4'))} > */}
+
+  //       <h3>preview </h3>
+  //     </button>
+  //   </strong>),}
   ];
   const handleRowSelection = (e) => {
+    setListenTo(e)
     setSelection(e.selectionModel);
+    //e.selectionModel
   }
   
   useEffect(() => {
@@ -260,6 +268,7 @@ export default function Dashboard({code} ) {
     for (let i = 0; i < countries.length; i++){ 
     items.push(<MenuItem value={countries[i]}>{countries[i]}</MenuItem>)
     }
+  console.log(listento,'listen')
     
   
 
@@ -270,6 +279,9 @@ export default function Dashboard({code} ) {
                   <h1>Sounds of the World</h1>
         </AppBar>
         <div className ={classes.main}>
+        <div style={{paddingBottom: '100px'}} >
+            <Player accessToken={accessToken} trackUri={uris[(select[select.length-1])-1]} />
+            </div>
           <FormControl className= {classes.formControl}>
             <InputLabel style= {{}}> What Country are you visiting?</InputLabel>
             <Select onChange={handleChange}>
@@ -282,6 +294,7 @@ export default function Dashboard({code} ) {
           <div style={{ height: 500, width: '80%', }} >
             {output}
           </div >
+          
         </div>
       </div>
     
