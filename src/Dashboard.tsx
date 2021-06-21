@@ -63,7 +63,8 @@ export default function Dashboard({code} ) {
     var [previews,setPreview]= useState([]);
     var[uris,setUris]=useState([]);
     var [select,setSelection] = useState([]);
-  
+    var [addTrackButton, setaddTrackButton]=useState();
+    var hi;
 
     //Gets the user selected country
     const accessToken=useAuth(code);
@@ -91,6 +92,7 @@ export default function Dashboard({code} ) {
     }, [accessToken, value,playlist_id])
     
     useEffect(()=>{//puts the top 25 songs into table
+      console.log('og select',select);
       if (!accessToken) return
       if (playlist_id=='') return
       console.log('here',playlist_id)
@@ -98,7 +100,6 @@ export default function Dashboard({code} ) {
       
         spotifyApi.getPlaylistTracks(playlist_id,{fields: 'items'}).then(
         function(data) {
-          select=[]
           artists=[]
           tracks=[]
           previews=[]
@@ -125,12 +126,10 @@ export default function Dashboard({code} ) {
           })
           
     }, [accessToken, value,playlist_id])
-    
-    // let ready=false
-    // console.log('ready',ready)
     let output=''
     
     function createPlaylist() {
+      console.log('og select',select);
       if (!accessToken) return
       if (output=='') return
       spotifyApi.setAccessToken(accessToken)
@@ -139,20 +138,20 @@ export default function Dashboard({code} ) {
       console.log('Created playlist!', data);
       my_id=data.body.id
       console.log('playlist_id', my_id)
+      alert('Your new playlist has been created')
       }, function(err) {
         console.log('Something went wrong!', err);
-        return my_id;
         });
         
     };
-    console.log("ghgj",my_id)
+    
     function addTracks() {
-      //if (output=='') return
+      console.log('og select',select);
       console.log("ghgj",my_id)
       spotifyApi.setAccessToken(accessToken)
       var selectedSongs=[];
       var x
-      console.log(select)
+      console.log('select',select)
       for (let x=0; x< select.length;x++){
         selectedSongs.push(uris[(select[x]-1)])
       }
@@ -161,12 +160,39 @@ export default function Dashboard({code} ) {
       spotifyApi.addTracksToPlaylist(my_id,selectedSongs)
       .then(function(data) {
       console.log('added tracks to playlist', data);
+      alert('The tracks have been added to your playlist')
       }, function(err) {
         console.log('Something went wrong add tracks!', err);
         return;
         });
         
     };
+    function addToLibrary() {
+      console.log('og select',select);
+      console.log("ghgj",my_id)
+      spotifyApi.setAccessToken(accessToken)
+      var selectedSongs=[];
+      var x
+      var val=''
+      console.log('select',select)
+      for (let x=0; x< select.length;x++){
+        val=uris[(select[x]-1)]
+        selectedSongs.push(val.slice(14) )
+      }
+      console.log(uris)
+      console.log('selectedsongs',selectedSongs)
+      spotifyApi.addToMySavedTracks(selectedSongs)
+      .then(function(data) {
+      console.log('added tracks to playlist', data);
+      alert('The tracks have been added to your library')
+      
+      }, function(err) {
+        console.log('Something went wrong add tracks!', err);
+        return;
+        });
+        
+    };
+    
     
     
     //structure of table
@@ -217,7 +243,7 @@ export default function Dashboard({code} ) {
   }
   
   useEffect(() => {
-    console.log(select); // <-- The state is updated
+    console.log('og select',select); // <-- The state is updated
   }, [select]);
   
 
@@ -226,16 +252,15 @@ export default function Dashboard({code} ) {
   //console.log('tracks3', tracks)
   if (tracks.length>0) {
     output = <DataGrid checkboxSelection   onSelectionModelChange = {handleRowSelection} rows={rows} columns={columns} />;
-    // ready=true
-    // console.log('ready',ready)
+    
   }
+  
   //creates drop down for countries
   const items=[]
     for (let i = 0; i < countries.length; i++){ 
     items.push(<MenuItem value={countries[i]}>{countries[i]}</MenuItem>)
     }
     
-  //console.log(this.dataGridRef.current.instance)
   
 
     return (
@@ -252,7 +277,8 @@ export default function Dashboard({code} ) {
             </Select> 
           </FormControl>
           <button onClick={createPlaylist}  style= {{font: '40px', height:'40px',marginLeft: '40px', background:'#002699', color:'white'  }}>Create New PLaylist</button>
-          <button onClick={addTracks}  style= {{font: '40px', height:'40px',marginLeft: '40px', background:'#002699', color:'white'  }}>Add Tracks</button>
+          <button onClick={addTracks}  style= {{font: '40px', height:'40px',marginLeft: '40px', background:'#002699', color:'white'  }}>Add Tracks</button> 
+          <button onClick={addToLibrary}  style= {{font: '40px', height:'40px',marginLeft: '40px', background:'#002699', color:'white'  }}>Add To liked tracks</button> 
           <div style={{ height: 500, width: '80%', }} >
             {output}
           </div >
