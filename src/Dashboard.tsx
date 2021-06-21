@@ -66,6 +66,8 @@ export default function Dashboard({code} ) {
     var[uris,setUris]=useState([]);
     var [select,setSelection] = useState([]);
     var [listento, setListenTo]=useState([]);
+    var[recent, setrecent]=useState();
+    var[old, setOld]= useState([]);
 
     //Gets the user selected country
     const accessToken=useAuth(code);
@@ -194,11 +196,7 @@ export default function Dashboard({code} ) {
         
     };
     
-    // function listens(song){
-    //   setListenTo(song)
-    //   console.log('set to', listento);
-    //   return ;
-    // }
+    
     
     //structure of table
     const rows: GridRowsProp = [
@@ -244,11 +242,32 @@ export default function Dashboard({code} ) {
   //     </button>
   //   </strong>),}
   ];
+  var old;
   const handleRowSelection = (e) => {
-    setListenTo(e)
+    setOld(select)
+    console.log(old, 'old')
     setSelection(e.selectionModel);
+    console.log('ere', select)
+    
     //e.selectionModel
   }
+  useEffect(()=>{
+  if (select.length==1){
+    setrecent(select[0]-1)
+    console.log('emepty', recent)
+    return
+  }
+  for (let x=0; x < old.length; x++ in old){
+    if(old[x]!=select[x]){
+      console.log('select[x', select[x])
+      setrecent(select[x]-1)
+      console.log('recent1',recent)
+      return
+    }
+  }
+  setrecent(select[select.length-1]-1)
+    console.log('recent2',recent)
+  }, [old,select]);
   
   useEffect(() => {
     console.log('og select',select); // <-- The state is updated
@@ -268,7 +287,7 @@ export default function Dashboard({code} ) {
     for (let i = 0; i < countries.length; i++){ 
     items.push(<MenuItem value={countries[i]}>{countries[i]}</MenuItem>)
     }
-  console.log(listento,'listen')
+  console.log(old,'old')
     
   
 
@@ -280,7 +299,7 @@ export default function Dashboard({code} ) {
         </AppBar>
         <div className ={classes.main}>
         <div style={{paddingBottom: '100px'}} >
-            <Player accessToken={accessToken} trackUri={uris[(select[select.length-1])-1]} />
+            <Player accessToken={accessToken} trackUri={uris[recent]} />
             </div>
           <FormControl className= {classes.formControl}>
             <InputLabel style= {{}}> What Country are you visiting?</InputLabel>
