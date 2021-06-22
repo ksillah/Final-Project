@@ -1,23 +1,23 @@
 import {React, useState} from 'react';
 import ReactDOM from 'react-dom';
-import Player from './Player'
+import Player from './components/Player/Player'
 import useAuth from './useAuth';
 import SpotifyWebApi from 'spotify-web-api-node';
-import {Select, FormControl, InputLabel, AppBar, Button, Link} from '@material-ui/core';
+import {Select, FormControl, InputLabel, AppBar, Button} from '@material-ui/core';
 import { createStyles, makeStyles, Theme } from '@material-ui/core/styles';
 import Container from '@material-ui/core/Container';
 import TextField from '@material-ui/core/TextField';
 import MenuItem from '@material-ui/core/MenuItem';
 import Typography from '@material-ui/core/Typography';
 import { useEffect } from 'react';
-import { DataGrid, GridRowsProp, GridColDef, GridCellParams , } from '@material-ui/data-grid';
+import { DataGrid, GridRowsProp, GridColDef, GridCellParams, composeClasses , } from '@material-ui/data-grid';
 import { useGridApiRef } from '@material-ui/x-grid';
+import { Link, withRouter } from 'react-router-dom';
 
 import { render } from '@testing-library/react';
 import { redirectUri } from './config_example';
-//import countries from './countries';
 
-//const cors=require('cors');
+//const cors=require('cors');/i
 const cors=require('cors')
 
 const countries = [
@@ -26,8 +26,7 @@ const countries = [
 'Iceland','India','Indonesia', 'Ireland','Israel','Italy','Japan','Latvia','Lithuania','Luxembourg','Malaysia','Mexico','Morocco','Netherlands',
 'New Zealand','Nicaragua','Nigeria','Norway','Panama','Paraguay','Peru','Philippines','Poland','Portugal','Puerto Rico','Romania','Russia','Saudi Arabia',
 'Singapore','Slovakia','South Africa','South Korea','Spain','Sweden','Switzerland','Taiwan','Thailand','Turkey','Ukraine','United Emirates',
-'United Kingdom','United States','Uruguay', 'Vietnam',
-]
+'United Kingdom','United States','Uruguay', 'Vietnam']
 let my_id=''
 
 
@@ -45,8 +44,16 @@ const useStyles = makeStyles(theme =>({
 },
   formControl:{
     position: 'relative',
-    minWidth:300,
+    maxWidth:'30%',
+    width: '50%',
     
+  },
+  made:{
+    paddingLeft:'200px', 
+    display:'block',
+    margin:'10px',
+    padding:'10px',
+
   }
 }));
 
@@ -55,9 +62,7 @@ const spotifyApi= new SpotifyWebApi({
 })
 
 
-
-
-export default function Dashboard({code} ) {
+ export default function Dashboard({code} ) {
   
     var [playlist_id, setPlaylist_id] = useState('');
     var [artists,setArtist]= useState([]);
@@ -65,7 +70,8 @@ export default function Dashboard({code} ) {
     var [previews,setPreview]= useState([]);
     var[uris,setUris]=useState([]);
     var [select,setSelection] = useState([]);
-    var [listento, setListenTo]=useState([]);
+    var [made, setmade]=useState([]);
+    var [titles, setTitles]=useState([]);
     var[recent, setrecent]=useState();
     var[old, setOld]= useState([]);
 
@@ -86,19 +92,17 @@ export default function Dashboard({code} ) {
       if (!value) return
       if (!accessToken) return
       spotifyApi.setAccessToken(accessToken)
-      console.log(value)
+      //console.log(value)
       spotifyApi.searchPlaylists("Top 50 - "+ value).then(function(data) {//finds the top 50 playlist for the selected country
         setPlaylist_id( data.body.playlists.items[0].id)
-        console.log('Found playlists are', data.body);
-        //console.log(playlist_id)
       })
     }, [accessToken, value,playlist_id])
     
     useEffect(()=>{//puts the top 25 songs into table
-      console.log('og select',select);
+      //console.log('og select',select);
       if (!accessToken) return
       if (playlist_id=='') return
-      console.log('here',playlist_id)
+      //console.log('here',playlist_id)
       spotifyApi.setAccessToken(accessToken)
       
         spotifyApi.getPlaylistTracks(playlist_id,{fields: 'items'}).then(
@@ -107,8 +111,8 @@ export default function Dashboard({code} ) {
           tracks=[]
           previews=[]
           uris=[]
-          console.log('made it')
-          console.log('The playlist contains these tracks', data.body);
+          //console.log('made it')
+          //console.log('The playlist contains these tracks', data.body);
           for (var i = 0; i < 25; i++) {
             var artist=data.body.items[i].track.artists[0].name
             var track=data.body.items[i].track.name
@@ -132,37 +136,41 @@ export default function Dashboard({code} ) {
     let output='';
     
     function createPlaylist() {
-      console.log('og select',select);
+      //console.log('og select',select);
       if (!accessToken) return
       if (output=='') return
       spotifyApi.setAccessToken(accessToken)
       spotifyApi.createPlaylist( `My ${value} playlist`, { 'description': `My favorite songs from the top 25 songs in ${value} right now`, 'public': true })
       .then(function(data) {
-      console.log('Created playlist!', data);
+      //console.log('Created playlist!', data);
       my_id=data.body.id
-      console.log('playlist_id', my_id)
+     // console.log('playlist_id', my_id)
       alert('Your new playlist has been created')
+      made.push(data.body.uri)
+      setmade(made)
+      titles.push(data.body.name)
+      setTitles(titles)
+     // console.log('made', made)
       }, function(err) {
         console.log('Something went wrong!', err);
         });
-        
     };
     
     function addTracks() {
-      console.log('og select',select);
-      console.log("ghgj",my_id)
+      //console.log('og select',select);
+      //console.log("ghgj",my_id)
       spotifyApi.setAccessToken(accessToken)
       var selectedSongs=[];
       var x
-      console.log('select',select)
+      //console.log('select',select)
       for (let x=0; x< select.length;x++){
         selectedSongs.push(uris[(select[x]-1)])
       }
-      console.log(uris)
-      console.log('selectedsongs',selectedSongs)
+      //console.log(uris)
+      //console.log('selectedsongs',selectedSongs)
       spotifyApi.addTracksToPlaylist(my_id,selectedSongs)
       .then(function(data) {
-      console.log('added tracks to playlist', data);
+      //console.log('added tracks to playlist', data);
       alert('The tracks have been added to your playlist')
       }, function(err) {
         console.log('Something went wrong add tracks!', err);
@@ -171,22 +179,22 @@ export default function Dashboard({code} ) {
         
     };
     function addToLibrary() {
-      console.log('og select',select);
-      console.log("ghgj",my_id)
+      //console.log('og select',select);
+      //console.log("ghgj",my_id)
       spotifyApi.setAccessToken(accessToken)
       var selectedSongs=[];
       var x
       var val=''
-      console.log('select',select)
+     // console.log('select',select)
       for (let x=0; x< select.length;x++){
         val=uris[(select[x]-1)]
         selectedSongs.push(val.slice(14) )
       }
-      console.log(uris)
-      console.log('selectedsongs',selectedSongs)
+     // console.log(uris)
+      //console.log('selectedsongs',selectedSongs)
       spotifyApi.addToMySavedTracks(selectedSongs)
       .then(function(data) {
-      console.log('added tracks to playlist', data);
+      //console.log('added tracks to playlist', data);
       alert('The tracks have been added to your library')
       
       }, function(err) {
@@ -195,8 +203,6 @@ export default function Dashboard({code} ) {
         });
         
     };
-    
-    
     
     //structure of table
     const rows: GridRowsProp = [
@@ -230,51 +236,49 @@ export default function Dashboard({code} ) {
   { field: 'col1', headerName: 'Artist', width: 200 },
   { field: 'col2', headerName: 'Song', width: 300 },
   {field: 'col3', headerName: 'Preview', width: 200, hide:true},
-  {field:'col4', headerName:'Uri', width:200}
-  // {field: 'col5', headerName: 'Button', width:200,
-  // renderCell: (params: GridCellParams) => (//creates preview link
-  //   <strong>
-  //     <button style={{ color:'blue'}} > 
+  {field:'col4', headerName:'Uri', width:200,hide:true },
+  {field: 'col5', headerName: 'Button', width:200,
+  renderCell: (params: GridCellParams) => (//creates preview link
+    <strong>
+      <a style={{ color:'blue'}}  href={params.getValue(params.id,'col4')} >
 
-  //     {/* onClick={setListenTo(params.getValue(params.id,'col4'))} > */}
-
-  //       <h3>preview </h3>
-  //     </button>
-  //   </strong>),}
+        <h3>preview </h3>
+      </a>
+    </strong>),}
+  
   ];
   var old;
   const handleRowSelection = (e) => {
     setOld(select)
-    console.log(old, 'old')
+    //console.log(old, 'old')
     setSelection(e.selectionModel);
-    console.log('ere', select)
+    //console.log('ere', select)
     
-    //e.selectionModel
   }
   useEffect(()=>{
   if (select.length==1){
     setrecent(select[0]-1)
-    console.log('emepty', recent)
+    //console.log('emepty', recent)
     return
   }
   for (let x=0; x < old.length; x++ in old){
     if(old[x]!=select[x]){
-      console.log('select[x', select[x])
+     // console.log('select[x', select[x])
       setrecent(select[x]-1)
-      console.log('recent1',recent)
+     // console.log('recent1',recent)
       return
     }
   }
   setrecent(select[select.length-1]-1)
-    console.log('recent2',recent)
+    //console.log('recent2',recent)
   }, [old,select]);
   
   useEffect(() => {
-    console.log('og select',select); // <-- The state is updated
+    //console.log('og select',select); // <-- The state is updated
   }, [select]);
   
 
-//determines if the data table should be shown
+  //determines if the data table should be shown
   
   //console.log('tracks3', tracks)
   if (tracks.length>0) {
@@ -282,20 +286,31 @@ export default function Dashboard({code} ) {
     
   }
   
+  let userPlaylists=[]
+  if (made.length>0){
+    userPlaylists=[<h3>View Your Playlists Here </h3>]
+    for (let i = 0; i < made.length; i++){ 
+  
+      userPlaylists.push(<a style={{textDecoration:'none', fontSize:'20px', padding: '20px'}}href={made[i]} >{titles[i]} </a>)
+      userPlaylists.push( <br></br>)
+      userPlaylists.push( <br></br>)
+    }
+  }
+  
+  
+  
   //creates drop down for countries
-  const items=[]
+    const items=[]
     for (let i = 0; i < countries.length; i++){ 
     items.push(<MenuItem value={countries[i]}>{countries[i]}</MenuItem>)
     }
-  console.log(old,'old')
-    
-  
+    //console.log(old,'old')
 
     return (
       
       <div>
         <AppBar  position="fixed" style= {{paddingLeft: '15px' }}>
-                  <h1>Sounds of the World</h1>
+                  <h1>Sounds of the World</h1> 
         </AppBar>
         <div className ={classes.main}>
         <div style={{paddingBottom: '100px'}} >
@@ -310,12 +325,16 @@ export default function Dashboard({code} ) {
           <button onClick={createPlaylist}  style= {{font: '40px', height:'40px',marginLeft: '40px', background:'#002699', color:'white'  }}>Create New PLaylist</button>
           <button onClick={addTracks}  style= {{font: '40px', height:'40px',marginLeft: '40px', background:'#002699', color:'white'  }}>Add Tracks</button> 
           <button onClick={addToLibrary}  style= {{font: '40px', height:'40px',marginLeft: '40px', background:'#002699', color:'white'  }}>Add To liked tracks</button> 
-          <div style={{ height: 500, width: '80%', }} >
+          <div style={{ height: 500, width: '100%', display:'flex',  }} >
+            <div style={{width: '60%'}}>
             {output}
+            </div>
+            <div className={classes.made}>
+              {userPlaylists}
+            </div>
           </div >
           
         </div>
-      </div>
-    
-  );
-}
+      </div> 
+    );
+    }

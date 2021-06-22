@@ -3,6 +3,7 @@ import { Container } from "react-bootstrap"
 import { makeStyles } from '@material-ui/core';
 import { createMuiTheme } from '@material-ui/core/styles';
 import Button from '@material-ui/core/Button';
+import { Dashboard } from './components';
 //import background from '../../assets/images/map.jpg';
 //import {Link} from 'react-router-dom';
 import CssBaseline from '@material-ui/core/CssBaseline';
@@ -27,73 +28,25 @@ const drawerWidth = 240;
 
 const useStyles = makeStyles( (theme:Theme) =>
 createStyles({
-    root:{
-        padding: '0',
-        margin: '0'
-    },
-    navbar_container: {
-        display: 'flex',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-        background: '#78909c',
-        Color:'#c1d5e0'
-        
-    },
-    logo:{
-        margin: '0 0 0 0.45em'
-    },
-    logo_a: {
-        color: 'white'
-    },
-    logo_navigation: {
-        listStyle: 'none',
-        textTransform: 'uppercase',
-        textDecoration: 'none'
-    },
-    navigation: {
-        display: 'flex',
-        align: 'center',
-        margin: 'auto'
-    },
-    nav_a:{
-        display: 'block',
-        padding: '1em',
-        color: 'white',
-        
-    },
-    main: {
+   
+    main: {  
         width: '100%',
         height: '100%',
-        // backgroundImage: ` url(${background})`,
-        // backgroundSize: 'cover',
-        // backgroundRepeat: 'no-repeat',
-        // backgroundPosition: 'center',
-        // position: 'absolute',
+        backgroundColor: '#ccf5ff',//light blue
         textAlign: 'center',
         paddingTop: '250px',
-    },
-    my_name:{
-        textAlign: 'center',
-        position: 'relative',
-        top: '10%',
-        left: '50%',
-        transform: 'translate(-50%, -50%)',
-        color: 'white',
-        fontFamily: 'Arsenal, monospace',
-        letterSpacing:'10px',
-        fontSize: '22px'
+        marginBottom:'10px',
+        position:'absolute',
+        
     },
     login_button:{
-        color:'white', 
+        color:'#ccf5ff', 
+        background:'#00008B',
         textDecoration:'None',
-        background:'black',
-        border : 'solid',
-        borderWidth: '12px',
-        //textAlign: 'center',
-        
-        fontSize:'40px',
+        border: 'solid',
+        fontSize:'25px',
         width:'30%',
-        //alignItems: 'center',
+        paddingTop:''
     },
     
 }));
@@ -121,17 +74,24 @@ const code = new URLSearchParams(window.location.search).get("code")
 
     
 
-export default function Login() {
+export const Login = ()=>{
+//export default function Login() {
   const classes = useStyles();
     return (
         <div>
-          <Container className={classes.main} >
+        <AppBar  position="fixed" style= {{paddingLeft: '15px' }}>
+                  <h1>Sounds of the World</h1> 
+        </AppBar>
+        
+          <div className={classes.main} >
+              <h3 style={{fontSize: '30px',color:'#00008B'}}>Learn which songs are popular in other countries.</h3> 
             <a className={classes.login_button} href={AUTH_URL}> Login With Spotify </a>
             
-          </Container>
+          </div>
 
            
             
         </div>
+        
     )
 }

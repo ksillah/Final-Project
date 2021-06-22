@@ -1,14 +1,18 @@
-//import "bootstrap/dist/css/bootstrap.min.css"////
 import React from 'react';
 import ReactDOM from 'react-dom';
-import Login from "./Login"
-import Dashboard from "./Dashboard"
-//import SiginIn from "./SignIn"
+import Dashboard from './Dashboard';
+import {  Login } from './components';
+import Playlists from './Playlists';
+import{BrowserRouter as Router, Switch, Route} from 'react-router-dom';
+
 
 const code = new URLSearchParams(window.location.search).get("code")
 
 function App() {
   return code ? <Dashboard code={code} /> : <Login />
+  
+  
 }
 
 export default App ;
+
