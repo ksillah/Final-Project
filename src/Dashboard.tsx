@@ -67,6 +67,7 @@ const spotifyApi= new SpotifyWebApi({
 
     //Gets the user selected country
     const accessToken=useAuth(code);
+    console.log('access', accessToken)
     const classes= useStyles();
     const [value, setValue] = useState('');
     const handleChange = e => setValue(e.target.value)//identifies the user selected country
