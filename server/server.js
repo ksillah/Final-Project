@@ -3,7 +3,6 @@ const express = require('express');
 const SpotifyWebApi = require('spotify-web-api-node');
 const cors=require('cors')
 const bodyParser= require("body-parser")
-require('dotenv').config();
 const clientid= variables.REACT_APP_CLIENTID
 const clientsecret=variables.REACT_APP_CLIENTSECRET
 
@@ -15,7 +14,7 @@ app.post('/refresh', (req,res) =>{
     const refreshToken= req.body.refreshToken
     const spotifyApi = new SpotifyWebApi({
         clientId : clientid,
-        redirectUri : "https://sounds-of-the-world-6b630.web.app/callback/",
+        redirectUri : "http://localhost:3000/callback/",
         clientSecret : clientsecret,
         refreshToken
     })
@@ -35,7 +34,7 @@ app.post('/login', (req, res)=>{
     const code = req.body.code
     const spotifyApi = new SpotifyWebApi({
         clientId : clientid,
-        redirectUri : "https://sounds-of-the-world-6b630.web.app/callback/",
+        redirectUri : "http://localhost:3000/callback/",
         clientSecret : clientsecret,
     })
     
@@ -45,11 +44,11 @@ app.post('/login', (req, res)=>{
             accessToken: data.body.access_token,
             refreshToken : data.body.refresh_token,
             expiresIn: data.body.expires_in,
+            
         })
     }).catch((err) => {
         console.log(err)
         res.sendStatus(400)
     })
 })
-
 app.listen(3001)

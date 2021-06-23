@@ -7,9 +7,10 @@ export default function useAuth(code) {
     const [expiresIn, setExpiresIn]= useState()
 
     useEffect(() =>{
-        axios.post('https://sounds-of-the-world-6b630.web.app',{
+        axios.post( 'http://localhost:3001/login',{
            code, 
         }).then(res =>{
+            
             setAccessToken(res.data.accessToken)
             setRefreshToken(res.data.refreshToken)
             setExpiresIn(res.data.setExpiresIn)

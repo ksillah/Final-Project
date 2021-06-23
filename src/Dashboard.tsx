@@ -1,5 +1,6 @@
 import {useState} from 'react';
-import Player from './Player'
+import Player from './Player';
+import {CLIENTID} from './variables'
 import useAuth from './useAuth';
 import SpotifyWebApi from 'spotify-web-api-node';
 import {Select, FormControl, InputLabel, AppBar} from '@material-ui/core';
@@ -48,7 +49,7 @@ const useStyles = makeStyles(theme =>({
 }));
 
 const spotifyApi= new SpotifyWebApi({
-  clientId: "27f19ced5a414e7498169bdd52708cd5",
+  clientId: CLIENTID,
 })
 
 

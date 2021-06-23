@@ -28,20 +28,9 @@ createStyles({
     
 }));
 
-const SpotifyWebApi = require('spotify-web-api-node');
 
-
-const authEndpoint = 'https://accounts.spotify.com/authorize';
-// Replace with your app's client ID, redirect URI and desired scopes
 const clientId = CLIENTID;
-const redirectUri = "https://sounds-of-the-world-6b630.web.app/callback/"; 
-const scopes = [
-  "user-read-currently-playing",
-  "user-read-playback-state",
-  "playlist-modify-public",
-  "playlist-read-collaborative"
-];
-
+const redirectUri = "http://localhost:3000/callback/"; 
 const AUTH_URL =`https://accounts.spotify.com/authorize?client_id=${clientId}&response_type=code&redirect_uri=${redirectUri}&scope=streaming%20user-read-email%20user-read-private%20playlist-modify-public%20user-library-read%20user-library-modify%20user-read-playback-state%20user-modify-playback-state`
 
 export const Login = ()=>{
