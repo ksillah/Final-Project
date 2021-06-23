@@ -1,17 +1,10 @@
-import React from 'react';
-import ReactDOM from 'react-dom';
+import React from 'react'
 import Dashboard from './Dashboard';
-import {  Login } from './components';
-import Playlists from './Playlists';
-import{BrowserRouter as Router, Switch, Route} from 'react-router-dom';
-
-
+import { Login } from './Login'; 
 const code = new URLSearchParams(window.location.search).get("code")
 
 function App() {
   return code ? <Dashboard code={code} /> : <Login />
-  
-  
 }
 
 export default App ;

@@ -1,0 +1,2 @@
+const CLIENTID='27f19ced5a414e7498169bdd52708cd5'
+export {CLIENTID}

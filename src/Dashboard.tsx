@@ -1,23 +1,13 @@
-import {React, useState} from 'react';
-import ReactDOM from 'react-dom';
-import Player from './components/Player/Player'
+import {useState} from 'react';
+import Player from './Player'
 import useAuth from './useAuth';
 import SpotifyWebApi from 'spotify-web-api-node';
-import {Select, FormControl, InputLabel, AppBar, Button} from '@material-ui/core';
-import { createStyles, makeStyles, Theme } from '@material-ui/core/styles';
-import Container from '@material-ui/core/Container';
-import TextField from '@material-ui/core/TextField';
+import {Select, FormControl, InputLabel, AppBar} from '@material-ui/core';
+import {makeStyles} from '@material-ui/core/styles';
 import MenuItem from '@material-ui/core/MenuItem';
-import Typography from '@material-ui/core/Typography';
 import { useEffect } from 'react';
-import { DataGrid, GridRowsProp, GridColDef, GridCellParams, composeClasses , } from '@material-ui/data-grid';
+import { DataGrid, GridRowsProp, GridColDef, GridCellParams, } from '@material-ui/data-grid';
 import { useGridApiRef } from '@material-ui/x-grid';
-import { Link, withRouter } from 'react-router-dom';
-
-import { render } from '@testing-library/react';
-import { redirectUri } from './config_example';
-
-//const cors=require('cors');/i
 const cors=require('cors')
 
 const countries = [
@@ -65,19 +55,18 @@ const spotifyApi= new SpotifyWebApi({
  export default function Dashboard({code} ) {
   
     var [playlist_id, setPlaylist_id] = useState('');
-    var [artists,setArtist]= useState([]);
-    var [tracks,setTrack]= useState([]);
-    var [previews,setPreview]= useState([]);
-    var[uris,setUris]=useState([]);
+    var [artists,setArtist]= useState([] as any);
+    var [tracks,setTrack]= useState([] as any);
+    var [previews,setPreview]= useState([] as any);
+    var[uris,setUris]=useState([] as any);
     var [select,setSelection] = useState([]);
-    var [made, setmade]=useState([]);
-    var [titles, setTitles]=useState([]);
-    var[recent, setrecent]=useState();
+    var [made, setmade]=useState([] as any);
+    var [titles, setTitles]=useState([] as any);
+    var[recent, setrecent]=useState([] as any);
     var[old, setOld]= useState([]);
 
     //Gets the user selected country
     const accessToken=useAuth(code);
-    //console.log(accessToken)
     const classes= useStyles();
     const [value, setValue] = useState('');
     const handleChange = e => setValue(e.target.value)//identifies the user selected country
@@ -85,34 +74,38 @@ const spotifyApi= new SpotifyWebApi({
 
     useEffect(() =>{
       if (!accessToken) return
-      spotifyApi.setAccessToken(accessToken)
+      spotifyApi.setAccessToken(accessToken!)
     }, [accessToken])
 
     useEffect(()=>{
       if (!value) return
       if (!accessToken) return
-      spotifyApi.setAccessToken(accessToken)
-      //console.log(value)
+      spotifyApi.setAccessToken(accessToken!)
       spotifyApi.searchPlaylists("Top 50 - "+ value).then(function(data) {//finds the top 50 playlist for the selected country
-        setPlaylist_id( data.body.playlists.items[0].id)
+        if (value=="United Kingdom"){
+          setPlaylist_id( (data.body.playlists!).items[3].id)
+        }
+        else{
+          setPlaylist_id( (data.body.playlists!).items[0].id)
+
+        }
+        
       })
     }, [accessToken, value,playlist_id])
     
     useEffect(()=>{//puts the top 25 songs into table
-      //console.log('og select',select);
+      
       if (!accessToken) return
       if (playlist_id=='') return
-      //console.log('here',playlist_id)
-      spotifyApi.setAccessToken(accessToken)
+      spotifyApi.setAccessToken(accessToken!)
       
-        spotifyApi.getPlaylistTracks(playlist_id,{fields: 'items'}).then(
+        spotifyApi.getPlaylistTracks(playlist_id,{fields: 'items'}).then(//Gets data for the top 25 tracks
         function(data) {
-          artists=[]
-          tracks=[]
-          previews=[]
-          uris=[]
-          //console.log('made it')
-          //console.log('The playlist contains these tracks', data.body);
+          
+          artists=[];
+          tracks=[];
+          previews=[];
+          uris=[];
           for (var i = 0; i < 25; i++) {
             var artist=data.body.items[i].track.artists[0].name
             var track=data.body.items[i].track.name
@@ -133,44 +126,34 @@ const spotifyApi= new SpotifyWebApi({
           })
           
     }, [accessToken, value,playlist_id])
-    let output='';
+    let output;
     
     function createPlaylist() {
-      //console.log('og select',select);
       if (!accessToken) return
       if (output=='') return
-      spotifyApi.setAccessToken(accessToken)
-      spotifyApi.createPlaylist( `My ${value} playlist`, { 'description': `My favorite songs from the top 25 songs in ${value} right now`, 'public': true })
+      spotifyApi.setAccessToken(accessToken!)
+      spotifyApi.createPlaylist( `My ${value} playlist`, { 'description': `My favorite songs from the top 25 songs in ${value} right now!`, 'public': true })
       .then(function(data) {
-      //console.log('Created playlist!', data);
       my_id=data.body.id
-     // console.log('playlist_id', my_id)
       alert('Your new playlist has been created')
       made.push(data.body.uri)
       setmade(made)
       titles.push(data.body.name)
       setTitles(titles)
-     // console.log('made', made)
       }, function(err) {
         console.log('Something went wrong!', err);
         });
     };
     
-    function addTracks() {
-      //console.log('og select',select);
-      //console.log("ghgj",my_id)
-      spotifyApi.setAccessToken(accessToken)
-      var selectedSongs=[];
+    function addTracks() {//adds tracks to playlist
+      spotifyApi.setAccessToken(accessToken!)
+      var selectedSongs=[] as  any;
       var x
-      //console.log('select',select)
       for (let x=0; x< select.length;x++){
         selectedSongs.push(uris[(select[x]-1)])
       }
-      //console.log(uris)
-      //console.log('selectedsongs',selectedSongs)
       spotifyApi.addTracksToPlaylist(my_id,selectedSongs)
       .then(function(data) {
-      //console.log('added tracks to playlist', data);
       alert('The tracks have been added to your playlist')
       }, function(err) {
         console.log('Something went wrong add tracks!', err);
@@ -178,30 +161,22 @@ const spotifyApi= new SpotifyWebApi({
         });
         
     };
-    function addToLibrary() {
-      //console.log('og select',select);
-      //console.log("ghgj",my_id)
-      spotifyApi.setAccessToken(accessToken)
-      var selectedSongs=[];
+    function addToLibrary() {//Addds tracks to liked songs instead of creating a playlist
+      spotifyApi.setAccessToken(accessToken!)
+      var selectedSongs=[] as any;
       var x
       var val=''
-     // console.log('select',select)
       for (let x=0; x< select.length;x++){
         val=uris[(select[x]-1)]
         selectedSongs.push(val.slice(14) )
       }
-     // console.log(uris)
-      //console.log('selectedsongs',selectedSongs)
       spotifyApi.addToMySavedTracks(selectedSongs)
       .then(function(data) {
-      //console.log('added tracks to playlist', data);
       alert('The tracks have been added to your library')
-      
       }, function(err) {
         console.log('Something went wrong add tracks!', err);
         return;
         });
-        
     };
     
     //structure of table
@@ -240,53 +215,40 @@ const spotifyApi= new SpotifyWebApi({
   {field: 'col5', headerName: 'Button', width:200,
   renderCell: (params: GridCellParams) => (//creates preview link
     <strong>
-      <a style={{ color:'blue'}}  href={params.getValue(params.id,'col4')} >
+      <a style={{ color:'blue'}}  href={String(params.getValue(params.id,'col4'))} >
 
-        <h3>preview </h3>
+        <h3>PREVIEW </h3>
       </a>
     </strong>),}
   
   ];
-  var old;
-  const handleRowSelection = (e) => {
+  const handleRowSelection = (e) => {//keeps track of the current list of selected songs and the previous list of selected songs
     setOld(select)
-    //console.log(old, 'old')
     setSelection(e.selectionModel);
-    //console.log('ere', select)
     
   }
-  useEffect(()=>{
+  useEffect(()=>{//identifies which song was just selected and should be played on the spotify player
   if (select.length==1){
     setrecent(select[0]-1)
-    //console.log('emepty', recent)
     return
   }
   for (let x=0; x < old.length; x++ in old){
     if(old[x]!=select[x]){
-     // console.log('select[x', select[x])
       setrecent(select[x]-1)
-     // console.log('recent1',recent)
       return
     }
   }
   setrecent(select[select.length-1]-1)
-    //console.log('recent2',recent)
   }, [old,select]);
-  
-  useEffect(() => {
-    //console.log('og select',select); // <-- The state is updated
-  }, [select]);
   
 
   //determines if the data table should be shown
-  
-  //console.log('tracks3', tracks)
   if (tracks.length>0) {
     output = <DataGrid checkboxSelection   onSelectionModelChange = {handleRowSelection} rows={rows} columns={columns} />;
     
   }
-  
-  let userPlaylists=[]
+  //displays created playlists
+  let userPlaylists=[] as any
   if (made.length>0){
     userPlaylists=[<h3>View Your Playlists Here </h3>]
     for (let i = 0; i < made.length; i++){ 
@@ -297,15 +259,11 @@ const spotifyApi= new SpotifyWebApi({
     }
   }
   
-  
-  
   //creates drop down for countries
-    const items=[]
+    const items=[] as any
     for (let i = 0; i < countries.length; i++){ 
     items.push(<MenuItem value={countries[i]}>{countries[i]}</MenuItem>)
     }
-    //console.log(old,'old')
-
     return (
       
       <div>
@@ -317,7 +275,7 @@ const spotifyApi= new SpotifyWebApi({
             <Player accessToken={accessToken} trackUri={uris[recent]} />
             </div>
           <FormControl className= {classes.formControl}>
-            <InputLabel style= {{}}> What Country are you visiting?</InputLabel>
+            <InputLabel style= {{}}> Please Select A Country</InputLabel>
             <Select onChange={handleChange}>
               {items}
             </Select> 
@@ -333,7 +291,6 @@ const spotifyApi= new SpotifyWebApi({
               {userPlaylists}
             </div>
           </div >
-          
         </div>
       </div> 
     );
