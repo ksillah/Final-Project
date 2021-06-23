@@ -15,7 +15,7 @@ app.post('/refresh', (req,res) =>{
     const refreshToken= req.body.refreshToken
     const spotifyApi = new SpotifyWebApi({
         clientId : clientid,
-        redirectUri : "http://localhost:3000/callback/",
+        redirectUri : "https://sounds-of-the-world-6b630.web.app/callback/",
         clientSecret : clientsecret,
         refreshToken
     })
@@ -35,7 +35,7 @@ app.post('/login', (req, res)=>{
     const code = req.body.code
     const spotifyApi = new SpotifyWebApi({
         clientId : clientid,
-        redirectUri : "http://localhost:3000/callback/",
+        redirectUri : "https://sounds-of-the-world-6b630.web.app/callback/",
         clientSecret : clientsecret,
     })
     
