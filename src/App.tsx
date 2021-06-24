@@ -6,6 +6,7 @@ console.log(code)
 
 function App() {
   return code ? <Dashboard code={code} /> : <Login />
+  
 }
 
 export default App ;
